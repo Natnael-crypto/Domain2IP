@@ -44,9 +44,14 @@ pip install dnspython
   Output:
   The script will print the resolved IP addresses for each domain. Example output:
   ```
-  example.com: ['93.184.216.34']
-  google.com: ['172.217.164.110']
-  facebook.com: ['157.240.23.35']
++---------+-----------------+----------------------------+
+|  Number | Domain          | [IP Addresses]              |
++---------+-----------------+----------------------------+
+|       1 | example.com      | ['93.184.216.34']          |
+|       2 | google.com       | ['172.217.164.110']        |
+|       3 | facebook.com     | ['157.240.23.35']          |
++---------+-----------------+----------------------------+
+
   ```
 ## Command-Line Arguments
   filename: The file containing the domain names to resolve. Each domain should be on a new line.
