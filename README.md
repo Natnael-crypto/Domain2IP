@@ -45,11 +45,11 @@ pip install dnspython
   The script will print the resolved IP addresses for each domain. Example output:
   ```
 +---------+-----------------+----------------------------+
-|  Number | Domain          | [IP Addresses]              |
+|  Number | Domain          | [IP Addresses]             |
 +---------+-----------------+----------------------------+
-|       1 | example.com      | ['93.184.216.34']          |
-|       2 | google.com       | ['172.217.164.110']        |
-|       3 | facebook.com     | ['157.240.23.35']          |
+|       1 | example.com      | ['93.184.216.34']         |
+|       2 | google.com       | ['172.217.164.110']       |
+|       3 | facebook.com     | ['157.240.23.35']         |
 +---------+-----------------+----------------------------+
 
   ```
