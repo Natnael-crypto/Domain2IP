@@ -24,14 +24,14 @@ def resolve_domains_from_file(filename):
             domains = [line.strip() for line in file.readlines()]
 
         table = []
-        for domain in domains:
+        for i, domain in enumerate(domains, start=1):
             if domain:  # Check if the line is not empty
                 cleaned_domain = clean_domain(domain)
                 ips = get_ip(cleaned_domain)
-                table.append([cleaned_domain, ', '.join(ips)])
+                table.append([i, cleaned_domain, ', '.join(ips)])
 
         # Left-align the columns
-        print(tabulate(table, headers=["Domain", "IP Addresses"], tablefmt="pretty", colalign=("left", "left")))
+        print(tabulate(table, headers=["No.", "Domain", "IP Addresses"], tablefmt="pretty", colalign=("right", "left", "left")))
 
     except FileNotFoundError:
         print(f"File {filename} not found.")
