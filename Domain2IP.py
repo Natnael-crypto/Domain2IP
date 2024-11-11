@@ -1,6 +1,7 @@
 import dns.resolver
 import argparse
 from urllib.parse import urlparse
+from tabulate import tabulate
 
 def clean_domain(domain):
     """Remove schema (http://, https://) and trailing colon if present."""
@@ -15,22 +16,22 @@ def get_ip(domain):
         result = dns.resolver.resolve(domain, 'A')
         return [ip.to_text() for ip in result]
     except Exception as e:
-        print(f"Error resolving {domain}: {e}")
-        return []
+        return [f"Error: {e}"]
 
 def resolve_domains_from_file(filename):
     try:
         with open(filename, 'r') as file:
             domains = [line.strip() for line in file.readlines()]
+
+        table = []
         for domain in domains:
             if domain:  # Check if the line is not empty
                 cleaned_domain = clean_domain(domain)
                 ips = get_ip(cleaned_domain)
-                # Print in a formatted way
-                if ips:
-                    print(f"Domain: {cleaned_domain}, IP Address(es): {', '.join(ips)}")
-                else:
-                    print(f"Domain: {cleaned_domain}, No IP found")
+                table.append([cleaned_domain, ', '.join(ips)])
+
+        print(tabulate(table, headers=["Domain", "IP Addresses"], tablefmt="pretty"))
+
     except FileNotFoundError:
         print(f"File {filename} not found.")
     except Exception as e:
