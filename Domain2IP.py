@@ -30,7 +30,8 @@ def resolve_domains_from_file(filename):
                 ips = get_ip(cleaned_domain)
                 table.append([cleaned_domain, ', '.join(ips)])
 
-        print(tabulate(table, headers=["Domain", "IP Addresses"], tablefmt="pretty"))
+        # Left-align the columns
+        print(tabulate(table, headers=["Domain", "IP Addresses"], tablefmt="pretty", colalign=("left", "left")))
 
     except FileNotFoundError:
         print(f"File {filename} not found.")
