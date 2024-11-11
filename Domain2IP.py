@@ -15,8 +15,8 @@ def get_ip(domain):
     try:
         result = dns.resolver.resolve(domain, 'A')
         return [ip.to_text() for ip in result]
-    except Exception as e:
-        return [f"Error: {e}"]
+    except Exception:
+        return ["IP Not Found"]
 
 def resolve_domains_from_file(filename):
     try:
