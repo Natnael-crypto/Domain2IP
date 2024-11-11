@@ -26,7 +26,11 @@ def resolve_domains_from_file(filename):
             if domain:  # Check if the line is not empty
                 cleaned_domain = clean_domain(domain)
                 ips = get_ip(cleaned_domain)
-                print(f"{cleaned_domain}: {ips if ips else 'No IP found'}")
+                # Print in a formatted way
+                if ips:
+                    print(f"Domain: {cleaned_domain}, IP Address(es): {', '.join(ips)}")
+                else:
+                    print(f"Domain: {cleaned_domain}, No IP found")
     except FileNotFoundError:
         print(f"File {filename} not found.")
     except Exception as e:
