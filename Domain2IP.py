@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import dns.resolver
 import argparse
 from urllib.parse import urlparse
