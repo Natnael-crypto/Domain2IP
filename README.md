@@ -23,8 +23,8 @@ pip install dnspython
 ## Usage
 1. Clone the repository:
   ```bash
-  git clone https://github.com/your-username/domain-to-ip-resolver.git
-  cd domain-to-ip-resolver
+  git clone https://github.com/Natnael-crypto/Domain2IP.git
+  cd Domain2IP
   ```
 2. Prepare a file with the list of domain names:
 
