@@ -5,6 +5,7 @@ import argparse
 from urllib.parse import urlparse
 from tabulate import tabulate
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def clean_domain(domain):
     """Remove schema (http://, https://) and trailing colon if present."""
@@ -13,6 +14,7 @@ def clean_domain(domain):
     return cleaned_domain.rstrip(':')
 
 def get_ip(domain):
+    """Resolve IP addresses for a domain."""
     try:
         result = dns.resolver.resolve(domain, 'A')
         return [ip.to_text() for ip in result]
@@ -20,6 +22,7 @@ def get_ip(domain):
         return ["IP Not Found"]
 
 def check_http_status(domain):
+    """Check HTTP and HTTPS status codes for a domain."""
     results = []
     protocols = ["http", "https"]
 
@@ -33,54 +36,31 @@ def check_http_status(domain):
     
     return results
 
-def enumerate_technology(domain):
-    url = f"https://{domain}"  # Use https by default for scanning
-    try:
-        response = requests.get(url, timeout=5)
-        headers = response.headers
-
-        # Simple CMS detection using headers
-        cms = "Not found"
-        if "x-powered-by" in headers:
-            cms = headers["x-powered-by"]
-        elif "server" in headers:
-            if "WordPress" in headers["server"]:
-                cms = "WordPress"
-            elif "Wix" in headers["server"]:
-                cms = "Wix"
-            elif "Squarespace" in headers["server"]:
-                cms = "Squarespace"
-
-        # Detect programming language if possible
-        tech = headers.get("x-powered-by", "Not found")
-        return cms, tech
-
-    except requests.RequestException:
-        return "Not found", "Not found"
+def process_domain(domain):
+    """Process a single domain to get IPs and HTTP status codes."""
+    cleaned_domain = clean_domain(domain)
+    ips = get_ip(cleaned_domain)
+    status_codes = check_http_status(cleaned_domain)
+    return [cleaned_domain, ', '.join(ips), ', '.join(status_codes)]
 
 def resolve_domains_from_file(filename):
+    """Read domains from a file and process them concurrently."""
     try:
         with open(filename, 'r') as file:
-            domains = [line.strip() for line in file.readlines()]
+            domains = [line.strip() for line in file.readlines() if line.strip()]
 
         table = []
-        for i, domain in enumerate(domains, start=1):
-            if domain:
-                cleaned_domain = clean_domain(domain)
-                ips = get_ip(cleaned_domain)
-                status_codes = check_http_status(cleaned_domain)
-                cms, tech = enumerate_technology(cleaned_domain)
-                table.append([
-                    i, 
-                    cleaned_domain, 
-                    ', '.join(ips), 
-                    ', '.join(status_codes), 
-                    cms, 
-                    tech
-                ])
-
+        with ThreadPoolExecutor() as executor:
+            futures = {executor.submit(process_domain, domain): domain for domain in domains}
+            for i, future in enumerate(as_completed(futures), start=1):
+                try:
+                    domain_data = future.result()
+                    table.append([i, *domain_data])
+                except Exception as e:
+                    table.append([i, futures[future], "Error", str(e)])
+        
         # Left-align columns
-        print(tabulate(table, headers=["No.", "Domain", "IP Addresses", "Status Code", "CMS", "Programming Language"], tablefmt="pretty", colalign=("left", "left", "left", "left", "left", "left")))
+        print(tabulate(table, headers=["No.", "Domain", "IP Addresses", "Status Code"], tablefmt="pretty", colalign=("left", "left", "left", "left")))
 
     except FileNotFoundError:
         print(f"File {filename} not found.")
@@ -88,9 +68,9 @@ def resolve_domains_from_file(filename):
         print(f"Error reading file: {e}")
 
 def main():
+    """Main entry point for the script."""
     parser = argparse.ArgumentParser(description="Resolve IP addresses for a list of domains.")
     parser.add_argument('filename', type=str, help='The file containing the list of domain names')
-    
     args = parser.parse_args()
     resolve_domains_from_file(args.filename)
 
