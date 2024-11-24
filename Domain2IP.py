@@ -8,6 +8,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 from collections import Counter
+import textwrap
 
 def clean_domain(domain):
     """Remove schema (http://, https://) and trailing colon if present."""
@@ -38,12 +39,16 @@ def check_http_status(domain):
     
     return results
 
+def wrap_text(text, width=35):
+    """Wrap text to fit within a specified width."""
+    return '\n'.join(textwrap.wrap(text, width=width))
+
 def process_domain(domain):
     """Process a single domain to get IPs and HTTP status codes."""
     cleaned_domain = clean_domain(domain)
     ips = get_ip(cleaned_domain)
     status_codes = check_http_status(cleaned_domain)
-    return [cleaned_domain, ', '.join(ips), ', '.join(status_codes)], ips
+    return [wrap_text(cleaned_domain), '\n'.join(ips), ', '.join(status_codes)], ips
 
 def resolve_domains_from_file(filename):
     """Read domains from a file and process them concurrently."""
@@ -63,7 +68,7 @@ def resolve_domains_from_file(filename):
                     table.append([i, *domain_data])
                     all_ips.extend(ips)  # Collect all IPs for the second table
                 except Exception as e:
-                    table.append([i, futures[future], "Error", str(e)])
+                    table.append([i, wrap_text(futures[future]), "Error", str(e)])
         
         # Print the first table
         print(tabulate(table, headers=["No.", "Domain", "IP Addresses", "Status Code"], tablefmt="pretty", colalign=("left", "left", "left", "left")))
