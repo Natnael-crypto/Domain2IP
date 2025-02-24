@@ -23,7 +23,7 @@ def get_ip(domain):
         result = dns.resolver.resolve(domain, 'A')
         return [ip.to_text() for ip in result]
     except Exception:
-        return ["IP Not Found"]
+        return []
 
 def check_http_status(domain):
     """Check HTTP and HTTPS status codes for a domain."""
@@ -61,6 +61,17 @@ def write_csv(filename, data, headers):
         print(f"CSV file '{filename}' created successfully.")
     except Exception as e:
         print(f"Error writing to CSV file '{filename}': {e}")
+        
+
+def write_txt(filename, data):
+    try:
+        with open(filename, "w") as w:
+            for i in data:
+                w.write(str(i[1]))
+
+                w.write("\n")
+    except Exception as e:
+        print(f"Error writing to txt file '{filename}': {e}")
 
 def resolve_domains_from_file(filename):
     """Read domains from a file and process them concurrently."""
@@ -94,10 +105,12 @@ def resolve_domains_from_file(filename):
         ip_counter = Counter(all_ips)
         ip_table = [[i, ip, count] for i, (ip, count) in enumerate(ip_counter.items(), start=1)]
         print(tabulate(ip_table, headers=["No.", "IP Address", "Number of Repetitions"], tablefmt="pretty", colalign=("left", "left", "left")))
-
+        # print(ip_table[1][1])
         # Write the IP statistics to CSV
         ip_csv_data = [[row[1], row[2]] for row in ip_table]
         write_csv("ipaddress.csv", ip_csv_data, ["IP Address", "Number of Repetitions"])
+        
+        write_txt("ipaddress.txt", ip_table)
 
     except FileNotFoundError:
         print(f"File {filename} not found.")
